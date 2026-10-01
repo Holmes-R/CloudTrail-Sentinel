@@ -1,0 +1,55 @@
+rules:
+  - id: AUTH-001
+    title: Repeated failed console logins
+    description: Multiple failed AWS console authentication attempts occurred in a short period.
+    severity: medium
+    score: 45
+    threshold: 3
+    window_minutes: 15
+    match:
+      event_names: [ConsoleLogin]
+      success: false
+    mitre: {id: T1110, name: Brute Force}
+
+  - id: IAM-001
+    title: Access key created
+    description: A new long-lived access key was created and should be validated with the owner.
+    severity: high
+    score: 65
+    match:
+      event_names: [CreateAccessKey]
+      success: true
+    mitre: {id: T1098.001, name: "Account Manipulation: Additional Cloud Credentials"}
+
+  - id: IAM-002
+    title: Administrative policy attached
+    description: A highly privileged IAM policy was attached to an identity.
+    severity: critical
+    score: 90
+    match:
+      event_names: [AttachUserPolicy, AttachRolePolicy, PutUserPolicy, PutRolePolicy]
+      success: true
+      request_contains_any: [AdministratorAccess, "iam:*", "Action': '*", '"Action": "*"']
+    mitre: {id: T1098, name: Account Manipulation}
+
+  - id: IAM-003
+    title: Sensitive role assumption
+    description: A privileged role session was established.
+    severity: medium
+    score: 45
+    match:
+      event_names: [AssumeRole]
+      success: true
+      request_contains_any: [Admin, Security, Organization, Production]
+    mitre: {id: T1078.004, name: "Valid Accounts: Cloud Accounts"}
+
+  - id: DEFENSE-001
+    title: CloudTrail logging tampered with
+    description: CloudTrail was stopped, deleted, or modified, potentially impairing defenses.
+    severity: critical
+    score: 95
+    match:
+      event_names: [StopLogging, DeleteTrail, UpdateTrail]
+      success: true
+    mitre: {id: T1562.008, name: "Impair Defenses: Disable or Modify Cloud Logs"}
+
